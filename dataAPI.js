@@ -27,3 +27,11 @@ app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     next();
 });
+
+// adding functionality to log the requests
+app.use(function (req, res, next) {
+    var filename = path.basename(req.url);
+    var extension = path.extname(filename);
+    console.log("The file " + filename + " was requested.");
+    next();
+});
