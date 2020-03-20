@@ -59,5 +59,27 @@
       });
 });
 
+crud.post('/deleteFormData',(req,res) => {
+    console.dir(req.body);
+    pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+      var param1 = req.body.port_id ;
+      var param2 =  req.body.id ;
+      var querystring = "DELETE from public.formdata where id = $1 and port_id = $2";
+                console.log(querystring);
+                client.query( querystring,[param2,param1],function(err,result) {
+                done();
+                if(err){
+                     console.log(err);
+                     res.status(400).send(err);
+                }
+                res.status(200).send("Form Data with ID "+ param2+ " and port_id "+ param1 + " has been deleted (if it existed in the database)");
+             });
+      });
+});
+
 
     module.exports = crud;
