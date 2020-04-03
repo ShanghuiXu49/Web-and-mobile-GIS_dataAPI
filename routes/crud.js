@@ -20,7 +20,7 @@ crud.route('/testCRUD').get(function (req,res) {
 });
 
 
-    crud.post('/quizquestions',(req,res) => {
+    crud.post('/uploadQuestion',(req,res) => {
         // note that we are using POST here as we are uploading data
         // so the parameters form part of the BODY of the request rather than the RESTful API
         console.dir(req.body);
@@ -33,15 +33,14 @@ crud.route('/testCRUD').get(function (req,res) {
       // pull the geometry component together
       // note that well known text requires the points as longitude/latitude !
       // well known text should look like: 'POINT(-71.064544 42.28787)'
-      var param1 = req.body.question_title;
-      var param2 = req.body.question_text;
-      var param3 = req.body.answer_1;
-      var param4 = req.body.answer_2;
-      var param5 = req.body.answer_3;
-      var param6 = req.body.answer_4;
-      var param7 = req.body.port_id;
-      var param8 =req.body.correct_answer ;
-     
+        var param1 = req.body.question_title;
+        var param2 = req.body.question_text;
+        var param3 = req.body.answer_1;
+        var param4 = req.body.answer_2;
+        var param5 = req.body.answer_3;
+        var param6 = req.body.answer_4;
+        var param7 = req.body.port_id;
+        var param8 = req.body.correct_answer;
       // no need for injection prevention for st_geomfromtext as if 
       // the lat/lng values are not numbers it will not process them at all 
       // impossible to run a statement such as st_geomfromtext('POINT(delete from public.formdata')
@@ -50,15 +49,13 @@ crud.route('/testCRUD').get(function (req,res) {
       querystring += "($1,$2,$3,$4,$5,$6,$7,$8,";
       querystring += geometrystring + ")";
               console.log(querystring);
-              client.query( querystring,[param1,param2,param3,param4,param5,param6,param7,param8],function(err,result) {
+              client.query(querystring,[param1,param2,param3,param4,param5,param6,param7,param8],function(err,result) {
                 done();
                 if(err){
                      console.log(err);
                      res.status(400).send(err);
                 }
-                else {
-                  res.status(200).send("Question "+ req.body.question_text+ " has been inserted");
-                }
+                res.status(200).send("Question "+ req.body.question_text+ " has been inserted");
              });
       });
 });
@@ -80,9 +77,10 @@ crud.post('/deleteQuestion',(req,res) => {
                      console.log(err);
                      res.status(400).send(err);
                 }
-                res.status(200).send("Form Data with ID "+ param2+ " and port_id "+ param1 + " has been deleted (if it existed in the database)");
+                res.status(200).send("Question Data with ID "+ param2+ " and port_id "+ param1 + " has been deleted (if it existed in the database)");
              });
       });
 });
 
 module.exports = crud;
+// NB: this line of code should ALWAYS be at the end of the file
