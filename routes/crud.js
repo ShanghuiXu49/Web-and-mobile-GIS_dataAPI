@@ -20,7 +20,7 @@ crud.route('/testCRUD').get(function (req,res) {
 });
 
 
-    crud.post('/uploadQuestion',(req,res) => {
+    crud.post('/quizquestions',(req,res) => {
         // note that we are using POST here as we are uploading data
         // so the parameters form part of the BODY of the request rather than the RESTful API
         console.dir(req.body);
@@ -49,14 +49,16 @@ crud.route('/testCRUD').get(function (req,res) {
       var querystring = "INSERT into public.quizquestions (question_title,question_text,answer_1,answer_2, answer_3, answer_4,port_id,correct_answer,location) values ";
       querystring += "($1,$2,$3,$4,$5,$6,$7,$8,";
       querystring += geometrystring + ")";
-                console.log(querystring);
-                client.query( querystring,[param3,param4,param5,param6,param7,param8,param9],function(err,result) {
+              console.log(querystring);
+              client.query( querystring,[param1,param2,param3,param4,param5,param6,param7,param8],function(err,result) {
                 done();
                 if(err){
                      console.log(err);
                      res.status(400).send(err);
                 }
-                res.status(200).send("Form Data "+ req.body.name+ " has been inserted");
+                else {
+                  res.status(200).send("Question "+ req.body.question_text+ " has been inserted");
+                }
              });
       });
 });

@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.get('/',function (req,res) {
-	res.send("Hello World from the demo HTTPS Server on port 8000");
+	res.send("Hello World from http server");
 });
 
 // adding functionality to log the requests
