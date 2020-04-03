@@ -20,8 +20,10 @@ crud.route('/testCRUD').get(function (req,res) {
 });
 
 
-    crud.post('/insertFormData',(req,res) => {
-            console.dir(req.body);
+    crud.post('/uploadQuestion',(req,res) => {
+        // note that we are using POST here as we are uploading data
+        // so the parameters form part of the BODY of the request rather than the RESTful API
+        console.dir(req.body);
 
     pool.connect(function(err,client,done) {
         if(err){
@@ -31,23 +33,21 @@ crud.route('/testCRUD').get(function (req,res) {
       // pull the geometry component together
       // note that well known text requires the points as longitude/latitude !
       // well known text should look like: 'POINT(-71.064544 42.28787)'
-      var param1 = req.body.longitude ;
-      var param2 =  req.body.latitude ;
-
-      var param3 =  req.body.name ;
-      var param4 =  req.body.surname ;
-      var param5 = req.body.module;
-      var param6 = req.body.language;
-      var param7 = req.body.modulelist;
-      var param8 = req.body.lecturetime ;
-      var param9 =  req.body.port_id ;
+      var param1 = req.body.question_title;
+      var param2 = req.body.question_text;
+      var param3 = req.body.answer_1;
+      var param4 = req.body.answer_2;
+      var param5 = req.body.answer_3;
+      var param6 = req.body.answer_4;
+      var param7 = req.body.port_id;
+      var param8 =req.body.correct_answer ;
      
       // no need for injection prevention for st_geomfromtext as if 
       // the lat/lng values are not numbers it will not process them at all 
       // impossible to run a statement such as st_geomfromtext('POINT(delete from public.formdata')
-      var geometrystring = "st_geomfromtext('POINT("+req.body.latitude+" "+req.body.longitude+")',4326)";
-      var querystring = "INSERT into public.formdata(name,surname,module,language, modulelist,lecturetime, port_id,location) values ";
-      querystring += "($1,$2,$3,$4,$5,$6,$7,";
+      var geometrystring = "st_geomfromtext('POINT("+req.body.longitude+ " "+req.body.latitude +")',4326)";
+      var querystring = "INSERT into public.quizquestions (question_title,question_text,answer_1,answer_2, answer_3, answer_4,port_id,correct_answer,location) values ";
+      querystring += "($1,$2,$3,$4,$5,$6,$7,$8,";
       querystring += geometrystring + ")";
                 console.log(querystring);
                 client.query( querystring,[param3,param4,param5,param6,param7,param8,param9],function(err,result) {
@@ -61,7 +61,7 @@ crud.route('/testCRUD').get(function (req,res) {
       });
 });
 
-crud.post('/deleteFormData',(req,res) => {
+crud.post('/deleteQuestion',(req,res) => {
     console.dir(req.body);
     pool.connect(function(err,client,done) {
         if(err){
