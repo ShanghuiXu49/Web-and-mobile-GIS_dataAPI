@@ -1,3 +1,4 @@
+  
 // express is the server that forms part of the nodejs program
 var express = require('express');
 var path = require("path");
@@ -15,13 +16,11 @@ var credentials = {key: privateKey, cert: certificate};
 var httpsServer = https.createServer(credentials, app);
 
 httpsServer.listen(4480);
-app.use(bodyParser.urlencoded({
-	extended: true
-}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.get('/',function (req,res) {
-	res.send("Hello World from http server");
+	res.send("Hello World from  HTTPS Server on port 4480");
 });
 
 // adding functionality to log the requests

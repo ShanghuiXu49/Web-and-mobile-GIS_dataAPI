@@ -21,9 +21,7 @@ crud.route('/testCRUD').get(function (req,res) {
 
 
     crud.post('/uploadQuestion',(req,res) => {
-        // note that we are using POST here as we are uploading data
-        // so the parameters form part of the BODY of the request rather than the RESTful API
-        console.dir(req.body);
+            console.dir(req.body);
 
     pool.connect(function(err,client,done) {
         if(err){
@@ -41,6 +39,7 @@ crud.route('/testCRUD').get(function (req,res) {
         var param6 = req.body.answer_4;
         var param7 = req.body.port_id;
         var param8 = req.body.correct_answer;
+     
       // no need for injection prevention for st_geomfromtext as if 
       // the lat/lng values are not numbers it will not process them at all 
       // impossible to run a statement such as st_geomfromtext('POINT(delete from public.formdata')
@@ -48,19 +47,19 @@ crud.route('/testCRUD').get(function (req,res) {
       var querystring = "INSERT into public.quizquestions (question_title,question_text,answer_1,answer_2, answer_3, answer_4,port_id,correct_answer,location) values ";
       querystring += "($1,$2,$3,$4,$5,$6,$7,$8,";
       querystring += geometrystring + ")";
-              console.log(querystring);
-              client.query(querystring,[param1,param2,param3,param4,param5,param6,param7,param8],function(err,result) {
+                console.log(querystring);
+                client.query( querystring,[param1,param2,param3,param4,param5,param6,param7,param8],function(err,result) {
                 done();
                 if(err){
                      console.log(err);
                      res.status(400).send(err);
                 }
-                res.status(200).send("Question "+ req.body.question_text+ " has been inserted");
+                res.status(200).send("Question Data "+ req.body.question_title+ " has been inserted");
              });
       });
 });
 
-crud.post('/deleteQuestion',(req,res) => {
+crud.post('/deleteFormData',(req,res) => {
     console.dir(req.body);
     pool.connect(function(err,client,done) {
         if(err){
@@ -83,4 +82,3 @@ crud.post('/deleteQuestion',(req,res) => {
 });
 
 module.exports = crud;
-// NB: this line of code should ALWAYS be at the end of the file
