@@ -59,7 +59,7 @@ crud.route('/testCRUD').get(function (req,res) {
       });
 });
 
-crud.post('/deleteFormData',(req,res) => {
+crud.post('/deleteQuestionData',(req,res) => {
     console.dir(req.body);
     pool.connect(function(err,client,done) {
         if(err){
@@ -79,6 +79,41 @@ crud.post('/deleteFormData',(req,res) => {
                 res.status(200).send("Question Data with ID "+ param2+ " and port_id "+ param1 + " has been deleted (if it existed in the database)");
              });
       });
+});
+
+crud.get('/getQuizPoints/:port_id', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+          var colnames = "id, question_title, question_text, answer_1,";
+          colnames = colnames + "answer_2, answer_3, answer_4, port_id, correct_answer";
+          console.log("colnames are " + colnames);
+
+          // now use the inbuilt geoJSON functionality
+          // and create the required geoJSON format using a query adapted from here:
+          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
+          // note that query needs to be a single string with no line breaks so built it up bit by bit
+         var querystring = " SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features  FROM ";
+          querystring += "(SELECT 'Feature' As type     , ST_AsGeoJSON(lg.location)::json As geometry, ";
+          querystring += "row_to_json((SELECT l FROM (SELECT "+colnames + " ) As l      )) As properties";
+          querystring += "   FROM public.quizquestion As lg ";
+         querystring += " where port_id = $1 limit 100  ) As f ";
+          console.log(querystring);
+          var port_id = req.params.port_id; //
+          // run the second query
+          client.query(querystring,[port_id],function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows);
+        });
+    });
+
 });
 
 module.exports = crud;
