@@ -81,6 +81,7 @@ crud.post('/deleteQuestionData',(req,res) => {
       });
 });
 
+// The SQL for uploading user's answers
 crud.post('/uploadAnswers',(req,res) => {
             console.dir(req.body);
 
