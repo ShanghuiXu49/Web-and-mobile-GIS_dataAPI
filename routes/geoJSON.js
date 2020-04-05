@@ -190,5 +190,28 @@ geoJSON.get('/getQuizAnswer/:port_id', function (req,res) {
 
 });
 
+// Code to see all answers uploaded in the database (for testing purpose only)
+geoJSON.get('/getQuizAnswers', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+          // now use the inbuilt geoJSON functionality
+          // and create the required geoJSON format using a query adapted from here:
+          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
+          // note that query needs to be a single string with no line breaks so built it up bit by bit
+          // run the second query
+          client.query('SELECT * FROM public.quizanswers',function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows);
+        });
+    });
 
+});
     module.exports = geoJSON;
