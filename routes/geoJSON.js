@@ -59,6 +59,7 @@
         });
     });
 
+
 geoJSON.get('/getGeoJSON/:tablename/:geomcolumn', function (req,res) {
      pool.connect(function(err,client,done) {
         if(err){
@@ -123,8 +124,9 @@ geoJSON.get('/getGeoJSON/:tablename/:geomcolumn', function (req,res) {
     });
 });
 
+
      geoJSON.get('/getQuestionData/:port_id', function (req,res) {
-    pool.connect(function(err,client,done) {
+        pool.connect(function(err,client,done) {
            if(err){
                console.log("not able to get connection "+ err);
                res.status(400).send(err);
@@ -145,7 +147,7 @@ geoJSON.get('/getGeoJSON/:tablename/:geomcolumn', function (req,res) {
           querystring += " where port_id = $1 limit 100  ) As f "; 
           console.log(querystring);
 
-           var port_id = req.params.port_id; //
+           var port_id = req.params.port_id;//
 
            // run the second query
            client.query(querystring,[port_id],function(err,result) {
