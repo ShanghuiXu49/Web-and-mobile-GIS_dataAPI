@@ -96,8 +96,8 @@ crud.post('/uploadAnswers',(req,res) => {
         var param3 =  req.body.answer_selected;
         var param4 =  req.body.correct_answer 
 
-var querystring = "INSERT into public.quizanswers (port_id, question_id, answer_selected, correct_answer) values (";
-querystring += "$1,$2,$3,$4)";
+  var querystring = "INSERT into public.quizanswers (port_id, question_id, answer_selected, correct_answer) values (";
+  querystring += "$1,$2,$3,$4)";
         console.log(querystring);
         client.query(querystring,[param1,param2,param3,param4],function(err,result) {
           done();
@@ -105,7 +105,7 @@ querystring += "$1,$2,$3,$4)";
                console.log(err);
                res.status(400).send(err);
           }
-          res.status(200).send("Answer inserted for user "+req.body.port_id);
+          res.status(200).send("Answer has been inserted for user "+req.body.port_id);
        });
     });
 });
