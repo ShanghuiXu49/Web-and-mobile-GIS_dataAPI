@@ -315,3 +315,27 @@ geoJSON.get('/getParticipationRateMyUser/:port_id', function (req,res) {
     });
 
 });
+
+
+// Code to get daily participation rates for all user id
+geoJSON.get('/getParticipationRateAllUser', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+         var querystring = "select  array_to_json (array_agg(c)) from (select day, sum(questions_answered) as questions_answered, sum(questions_correct) as questions_correct from public.participation_rates group by day) c ";
+          console.log(querystring);
+          // run the second query
+          client.query(querystring,function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows[0]);
+        });
+    });
+
+});
