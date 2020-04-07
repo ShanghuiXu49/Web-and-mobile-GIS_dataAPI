@@ -264,3 +264,29 @@ geoJSON.get('/getRanking/:port_id', function (req,res) {
 
 });
     module.exports = geoJSON;
+
+// code to get the top 5 scorers in the database
+geoJSON.get('/getTop5Scorers', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+        var querystring = "select array_to_json (array_agg(c)) from (select rank() over (order by num_questions desc) as rank , port_id from (select COUNT(*) AS num_questions, port_id from public.quizanswers where answer_selected = correct_answer group by port_id) b limit 5) c";
+          // now use the inbuilt geoJSON functionality
+          // and create the required geoJSON format using a query adapted from here:
+          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
+          // note that query needs to be a single string with no line breaks so built it up bit by bit
+          // run the second query
+          client.query(querystring,function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows[0]);
+        });
+    });
+
+});
