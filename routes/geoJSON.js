@@ -214,4 +214,28 @@ geoJSON.get('/getQuizAnswers', function (req,res) {
     });
 
 });
+
+// Code to get the number of user's correct answers
+geoJSON.get('/getCorrectAnswer/:port_id', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+         var querystring = "SELECT COUNT(*) AS num_questions from public.quizanswers where (answer_selected = correct_answer) and port_id = $1";
+          console.log(querystring);
+          var port_id = req.params.port_id; //
+          // run the second query
+          client.query(querystring,[port_id],function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+             res.status(200).send(result.rows[0]["num_questions"]);
+        });
+    });
+
+})
     module.exports = geoJSON;
