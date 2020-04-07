@@ -339,3 +339,38 @@ geoJSON.get('/getParticipationRateAllUser', function (req,res) {
     });
 
 });
+
+//Code to get the quiz points added in the last week for all users
+geoJSON.get('/getLastWeekPoints', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+          var colnames = "id, question_title, question_text, answer_1,";
+          colnames = colnames + "answer_2, answer_3, answer_4, port_id, correct_answer";
+          console.log("colnames are " + colnames);
+
+          // now use the inbuilt geoJSON functionality
+          // and create the required geoJSON format using a query adapted from here:
+          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
+
+          // note that query needs to be a single string with no line breaks so built it up bit by bit
+          var querystring = "SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features  FROM";
+          querystring += "(SELECT 'Feature' As type     , ST_AsGeoJSON(lg.location)::json As geometry, ";
+          querystring += "row_to_json((SELECT l FROM (SELECT id, question_title, question_text, answer_1, answer_2, answer_3, answer_4, port_id, correct_answer) As l      )) As properties";
+          querystring += "   FROM public.quizquestions  As lg where timestamp > NOW()::DATE-EXTRACT(DOW FROM NOW())::INTEGER-7  limit 100  ) As f";
+          console.log(querystring);
+          // run the second query
+          client.query(querystring,function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows [0]);
+        });
+    });
+
+});
