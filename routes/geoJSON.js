@@ -290,3 +290,28 @@ geoJSON.get('/getTop5Scorers', function (req,res) {
     });
 
 });
+
+
+// Code to get daily participation rates for my user id only
+geoJSON.get('/getParticipationRateMyUser/:port_id', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+         var querystring = "select array_to_json (array_agg(c)) from (select * from public.participation_rates where port_id = $1) c";
+          console.log(querystring);
+          var port_id = req.params.port_id; //
+          // run the second query
+          client.query(querystring,[port_id],function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows[0]);
+        });
+    });
+
+});
