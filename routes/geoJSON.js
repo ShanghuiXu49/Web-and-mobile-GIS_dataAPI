@@ -483,21 +483,24 @@ geoJSON.get('/getUnanswered/:port_id', function (req,res) {
         }
           var colnames = "id, question_title, question_text, answer_1,";
           colnames = colnames + "answer_2, answer_3, answer_4, port_id, correct_answer";
-          console.log("colnames are " + colnames);
-          var param1 = req.params.id;
 
+          var param1 = req.params.port_id;
+          var param2 = req.params.port_id;
           // now use the inbuilt geoJSON functionality
           // and create the required geoJSON format using a query adapted from here:
           // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
           // note that query needs to be a single string with no line breaks so built it up bit by bit
-         var querystring = " SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features  FROM ";
+          var querystring = " SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features  FROM ";
           querystring += "(SELECT 'Feature' As type     , ST_AsGeoJSON(lg.location)::json As geometry, ";
-          querystring += "row_to_json((SELECT l FROM (SELECT id, question_title, question_text, answer_1, answer_2, answer_3, answer_4, port_id, correct_answer) As l )) As properties";
-          querystring += "  FROM (select * from public.quizquestions where id in (select question_id from public.quizanswers where port_id = $1 and answer_selected <> correct_answer union all select id from public.quizquestions where id not in (select question_id from public.quizanswers) and port_id = $2) ) as lg) As f";
+          querystring += "row_to_json((SELECT l FROM (SELECT id, question_title, question_text, answer_1, answer_2, answer_3, answer_4, port_id, correct_answer) ";
+          querystring += "As l )) As properties"
+          querystring += "  FROM (select * from public.quizquestions where id in (select question_id from public.quizanswers where port_id = $1 and ";
+          querystring += "answer_selected <> correct_answer union all select id from public.quizquestions where id not in ";
+          querystring += "(select question_id from public.quizanswers) and port_id = $2) ) as lg) As f";
           console.log(querystring);
-          var port_id = req.params.port_id; //
+           //
           // run the second query
-          client.query(querystring,[param1,port_id],function(err,result){
+          client.query(querystring,[param1,param2],function(err,result){
             //call `done()` to release the client back to the pool
             done();
             if(err){
