@@ -492,7 +492,7 @@ geoJSON.get('/getUnanswered/:port_id', function (req,res) {
           // note that query needs to be a single string with no line breaks so built it up bit by bit
          var querystring = " SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features  FROM ";
           querystring += "(SELECT 'Feature' As type     , ST_AsGeoJSON(lg.location)::json As geometry, ";
-          querystring += "row_to_json((SELECT l FROM (SELECT id, question_title, question_text, answer_1, answer_2, answer_3, answer_4, port_id, correct_answer) As l      )) As properties";
+          querystring += "row_to_json((SELECT l FROM (SELECT id, question_title, question_text, answer_1, answer_2, answer_3, answer_4, port_id, correct_answer) As l )) As properties";
           querystring += "  FROM (select * from public.quizquestions where id in (select question_id from public.quizanswers where port_id = $1 and answer_selected <> correct_answer union all select id from public.quizquestions where id not in (select question_id from public.quizanswers) and port_id = $2) ) as lg) As f";
           console.log(querystring);
           var port_id = req.params.port_id; //
