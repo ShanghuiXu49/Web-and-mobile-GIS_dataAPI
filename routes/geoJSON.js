@@ -412,4 +412,30 @@ geoJSON.get('/getClosest5Points/:lng/:lat', function (req,res) {
 
 });
 
+geoJSON.get('/getDifficultQuestions', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+          var querystring = "select array_to_json (array_agg(d)) from (select c.* from public.quizquestions c inner join (select count(*) as incorrectanswers, question_id from public.quizanswers where answer_selected <> correct_answer group by question_id order by incorrectanswers desc limit 5) b on b.question_id = c.id) d";
+          // now use the inbuilt geoJSON functionality
+          // and create the required geoJSON format using a query adapted from here:
+          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
+          // note that query needs to be a single string with no line breaks so built it up bit by bit
+
+          // run the second query
+          client.query(querystring,function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows);
+        });
+    });
+
+})
+
     module.exports = geoJSON;
