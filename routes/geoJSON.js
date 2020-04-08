@@ -263,7 +263,7 @@ geoJSON.get('/getRanking/:port_id', function (req,res) {
     });
 
 });
-    module.exports = geoJSON;
+
 
 // code to get the top 5 scorers in the database
 geoJSON.get('/getTop5Scorers', function (req,res) {
@@ -374,3 +374,42 @@ geoJSON.get('/getLastWeekPoints', function (req,res) {
     });
 
 });
+
+
+//Code to get 5 closest question points to the user loaction
+geoJSON.get('/getClosest5Points/:lng/:lat', function (req,res) {
+     pool.connect(function(err,client,done) {
+        if(err){
+            console.log("not able to get connection "+ err);
+            res.status(400).send(err);
+        }
+          var colnames = "id, question_title, question_text, answer_1,";
+          colnames = colnames + "answer_2, answer_3, answer_4, port_id, correct_answer";
+          console.log("colnames are " + colnames);
+
+          // now use the inbuilt geoJSON functionality
+          // and create the required geoJSON format using a query adapted from here:
+          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
+          // note that query needs to be a single string with no line breaks so built it up bit by bit
+         var querystring = " SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features";
+         querystring += "  FROM (SELECT 'Feature' As type     , ST_AsGeoJSON(lg.location)::json As geometry,";
+         querystring += " row_to_json((SELECT l FROM (SELECT id, question_title, question_text, answer_1, answer_2, answer_3, answer_4, port_id, correct_answer) As l )) As properties";
+         querystring += " FROM   (select c.* from public.quizquestions c inner join (select id, st_distance(a.location, st_geomfromtext('POINT("+req.params.lng+" "+req.params.lat+")',4326)) as distance";
+         querystring += " from public.quizquestions a order by distance asc limit 5) b on c.id = b.id ) as lg) As f";
+
+          console.log(querystring);
+          // run the second query
+          client.query(querystring,function(err,result){
+            //call `done()` to release the client back to the pool
+            done();
+            if(err){
+                  console.log(err);
+                  res.status(400).send(err);
+             }
+            res.status(200).send(result.rows);
+        });
+    });
+
+});
+
+    module.exports = geoJSON;
