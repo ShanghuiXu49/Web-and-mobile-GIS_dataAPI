@@ -20,7 +20,7 @@ crud.route('/testCRUD').get(function (req,res) {
 });
 
 
-    crud.post('/uploadQuestion',(req,res) => {
+crud.post('/uploadQuestion',(req,res) => {
             console.dir(req.body);
 
     pool.connect(function(err,client,done) {
@@ -81,39 +81,34 @@ crud.post('/deleteQuestionData',(req,res) => {
       });
 });
 
-crud.get('/getQuizPoints/:port_id', function (req,res) {
-     pool.connect(function(err,client,done) {
+// The SQL for uploading user's answers
+crud.post('/uploadAnswers',(req,res) => {
+            console.dir(req.body);
+
+    pool.connect(function(err,client,done) {
         if(err){
             console.log("not able to get connection "+ err);
             res.status(400).send(err);
         }
-          var colnames = "id, question_title, question_text, answer_1,";
-          colnames = colnames + "answer_2, answer_3, answer_4, port_id, correct_answer";
-          console.log("colnames are " + colnames);
 
-          // now use the inbuilt geoJSON functionality
-          // and create the required geoJSON format using a query adapted from here:
-          // http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html, accessed 4th January 2018
-          // note that query needs to be a single string with no line breaks so built it up bit by bit
-         var querystring = " SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features  FROM ";
-          querystring += "(SELECT 'Feature' As type     , ST_AsGeoJSON(lg.location)::json As geometry, ";
-          querystring += "row_to_json((SELECT l FROM (SELECT "+colnames + " ) As l      )) As properties";
-          querystring += "   FROM public.quizquestion As lg ";
-         querystring += " where port_id = $1 limit 100  ) As f ";
-          console.log(querystring);
-          var port_id = req.params.port_id; //
-          // run the second query
-          client.query(querystring,[port_id],function(err,result){
-            //call `done()` to release the client back to the pool
-            done();
-            if(err){
-                  console.log(err);
-                  res.status(400).send(err);
-             }
-            res.status(200).send(result.rows);
-        });
+        var param1 =  req.body.port_id ;
+        var param2 =  req.body.question_id ;
+        var param3 =  req.body.answer_selected;
+        var param4 =  req.body.correct_answer 
+
+  var querystring = "INSERT into public.quizanswers (port_id, question_id, answer_selected, correct_answer) values (";
+  querystring += "$1,$2,$3,$4)";
+        console.log(querystring);
+        client.query(querystring,[param1,param2,param3,param4],function(err,result) {
+          done();
+          if(err){
+               console.log(err);
+               res.status(400).send(err);
+          }
+          res.status(200).send("Answer has been inserted for user "+req.body.port_id);
+       });
     });
-
 });
+
 
 module.exports = crud;
